@@ -10,7 +10,7 @@
 #import "CirculateScrollview.h"
 
 @interface ViewController ()<CirculateScrollviewProtocol>
-
+@property (nonatomic, retain) CirculateScrollview *circleView;
 @end
 
 @implementation ViewController
@@ -18,16 +18,29 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    CirculateScrollview *view = [[CirculateScrollview alloc] initWithFrame:CGRectMake(0, 0, 320, 200) WithImageArr:@[[UIImage imageNamed:@"IMG_0686.JPG"] ,[UIImage imageNamed:@"IMG_0701.JPG"],[UIImage imageNamed:@"IMG_0703.JPG"],[UIImage imageNamed:@"IMG_0702.JPG"],[UIImage imageNamed:@"yys.jpg"]/**/ ] autoNextpageDurationTime:2.0f];
-    view.delegate = self;
+     _circleView = [[CirculateScrollview alloc] initWithFrame:CGRectMake(0, 0, 320, 200) WithImageArr:@[[UIImage imageNamed:@"IMG_0686.JPG"]] autoNextpage:YES animation:YES showPageBtn:NO];
+  
+    _circleView.delegate = self;
+    
 //    UIPageControl *pageCtl = [[UIPageControl alloc]initWithFrame:CGRectMake(0, 20, 320, 20)];
 //    pageCtl.backgroundColor = [UIColor redColor];
 //    pageCtl.currentPageIndicatorTintColor = [UIColor orangeColor];
 //    pageCtl.pageIndicatorTintColor = [UIColor blueColor];
 //    pageCtl.alpha = 0.3;
 //    view.pageCtl = pageCtl;
-//    view.autoNextpageAnimationTime = 1.0f;
-    [self.view addSubview:view];
+    //    view.autoNextpageAnimationTime = 1.0f;
+ 
+    [self.view addSubview:_circleView];
+    
+    
+    
+}
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        _circleView.imageArray =@[[UIImage imageNamed:@"IMG_0686.JPG"] ,[UIImage imageNamed:@"IMG_0701.JPG"],[UIImage imageNamed:@"IMG_0703.JPG"],[UIImage imageNamed:@"IMG_0702.JPG"],[UIImage imageNamed:@"yys.jpg"]].mutableCopy;
+        [_circleView reloadScrollView];
+//    });
 }
 -(void)circulateScrollview:(CirculateScrollview *)CirculateScrollview didSelectItemWithIndex:(NSInteger)currentIndex
 {
