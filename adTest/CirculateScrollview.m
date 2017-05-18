@@ -7,29 +7,27 @@
 //
 
 #import "CirculateScrollview.h"
-//#import <UIImageView+WebCache.h>
+//#import "UIImageView+WebCache.h"
 
 
 #define ViewWidth self.frame.size.width
 #define ViewHeight self.frame.size.height
 #define AllImageCount self.imageArray.count-1
 
-@interface CirculateScrollview()<UIScrollViewDelegate>
-{
+@interface CirculateScrollview() <UIScrollViewDelegate> {
     NSInteger endImageCount;//左边图片
     NSInteger oneImageCount;//中间图片[当前看到的图片]
     NSInteger secondImageCount;//右边图片
 }
-@property (nonatomic,strong)UIImageView *endImageView;
-@property (nonatomic,strong)UIImageView *oneImageView;
-@property (nonatomic,strong)UIImageView *secondImageView;
-@property (nonatomic,strong)NSTimer *timer;
+@property (nonatomic, strong) UIImageView *endImageView;
+@property (nonatomic, strong) UIImageView *oneImageView;
+@property (nonatomic, strong) UIImageView *secondImageView;
+@property (nonatomic, strong) NSTimer *timer;
 
 @end
 
 @implementation CirculateScrollview
--(void)awakeFromNib
-{
+- (void)awakeFromNib {
     [super awakeFromNib];
     self.isAutoNextPage = YES;
     self.autoNextpageDurationTime = 2.0f;
@@ -43,9 +41,10 @@
     self.pageCtl.pageIndicatorTintColor = [UIColor whiteColor];
     self.pageCtl.alpha = 1;
     
+    [self addSubview:self.circulateScrollView];
 }
--(instancetype)init
-{
+
+- (instancetype)init {
     self = [super init];
     if (self) {
         self.isAutoNextPage = YES;
@@ -59,11 +58,12 @@
         self.pageCtl.currentPageIndicatorTintColor = [UIColor greenColor];
         self.pageCtl.pageIndicatorTintColor = [UIColor whiteColor];
         self.pageCtl.alpha = 1;
+        
+        [self addSubview:self.circulateScrollView];
     }
     return self;
 }
--(instancetype)initWithFrame:(CGRect)frame WithImageArr:(NSArray *)imageArr
-{
+- (instancetype)initWithFrame:(CGRect)frame WithImageArr:(NSArray *)imageArr {
     self = [self init];
     NSAssert(imageArr.count >= 1, @"CirculateScrollview未设置图片或图片数为0");
     self.frame = frame;
@@ -72,8 +72,7 @@
     
     return self;
 }
-- (instancetype)initWithFrame:(CGRect)frame WithImageArr:(NSArray *)imageArr autoNextpage:(BOOL)autoNextpage animation:(BOOL)animation showPageBtn:(BOOL)showPageBtn
-{
+- (instancetype)initWithFrame:(CGRect)frame WithImageArr:(NSArray *)imageArr autoNextpage:(BOOL)autoNextpage animation:(BOOL)animation showPageBtn:(BOOL)showPageBtn {
     self = [self initWithFrame:frame WithImageArr:imageArr];
     self.isAutoNextPage = autoNextpage;
     
@@ -81,20 +80,14 @@
     
     return self;
 }
-//-(NSMutableArray *)imageArray
-//{
-//    if (!_imageArray) {
-//        _imageArray = [[NSMutableArray alloc]init];
-//    }
-//    return _imageArray;
-//}
-- (void)reloadScrollView
-{
-    //    self.imageArray = [imageArr mutableCopy];
+
+- (void)reloadScrollView {
     [self drawRect:self.frame];
 }
+
 - (void)drawRect:(CGRect)rect {
-    self.circulateScrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, ViewWidth, ViewHeight)];
+    
+    self.circulateScrollView.frame = CGRectMake(0, 0, ViewWidth, ViewHeight);
     
     endImageCount = self.imageArray.count-1;
     oneImageCount = 0;
@@ -114,10 +107,11 @@
         return;
     }
     
+    for (UIView *view in self.circulateScrollView.subviews) {
+        [view removeFromSuperview];
+    }
     
     UITapGestureRecognizer *imagetap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didSelectImageView)];
-    
-    
     
     //若广告数量少于2张则不采用三屏复用技术
     if (self.imageArray.count<=1){
@@ -129,9 +123,9 @@
         [self.endImageView addGestureRecognizer:imagetap];
         
         [self.circulateScrollView addSubview:self.endImageView];
-        [self addSubview:self.circulateScrollView];
         
-    }else{
+        
+    } else {
         self.circulateScrollView.contentSize = CGSizeMake(ViewWidth*3, ViewHeight);
         
         //左
@@ -148,7 +142,7 @@
         self.secondImageView = [[UIImageView alloc]initWithFrame:CGRectMake(ViewWidth*2, 0, ViewWidth, ViewHeight)];
         [self imageView:self.secondImageView setImageWithImage:self.imageArray[secondImageCount]];
         [self.circulateScrollView addSubview:self.secondImageView];
-        [self addSubview:self.circulateScrollView];
+        //        [self addSubview:self.circulateScrollView];
         
         if (self.isShowPageCtl) {
             [self pageNumControl];
@@ -161,12 +155,8 @@
         }
         //是否自动翻页
         if (self.isAutoNextPage && self.autoNextpageDurationTime > 0) {
-            //            __weak typeof(self) weakSelf = self;
-            self.timer = [NSTimer scheduledTimerWithTimeInterval:self.autoNextpageDurationTime target:self selector:@selector(timerBegin) userInfo:nil repeats:YES];
             
-            //            self.timer = [NSTimer scheduledTimerWithTimeInterval:self.autoNextpageDurationTime repeats:YES block:^(NSTimer * _Nonnull timer) {
-            //                [weakSelf nextPage];
-            //            }];
+            self.timer = [NSTimer scheduledTimerWithTimeInterval:self.autoNextpageDurationTime target:self selector:@selector(timerBegin) userInfo:nil repeats:YES];
         }
         
         //是否显示下一页按钮
@@ -192,13 +182,12 @@
     }
     
 }
--(void)timerBegin
-{
+
+- (void)timerBegin {
     [self nextPage];
 }
-- (void)nextPage
-{
-    
+
+- (void)nextPage {
     [UIView animateWithDuration:self.autoNextpageAnimationTime animations:^{
         self.circulateScrollView.contentOffset = CGPointMake(ViewWidth*2, 0);
     }];
@@ -206,8 +195,8 @@
     [self resetTheScrollView];
     
 }
-- (void)previousPage
-{
+
+- (void)previousPage {
     [UIView animateWithDuration:self.autoNextpageAnimationTime animations:^{
         self.circulateScrollView.contentOffset = CGPointMake(0, 0);
     }];
@@ -216,33 +205,28 @@
 }
 
 //设置图片 适配不同image类型
-- (BOOL)imageView:(UIImageView *)imageView setImageWithImage:(id)image
-{
+- (BOOL)imageView:(UIImageView *)imageView setImageWithImage:(id)image {
     
     if ([image isKindOfClass:[NSString class]]) {
         if ([image hasPrefix:@"http"]) {
 //            [imageView sd_setImageWithURL:image placeholderImage:PlaceholderImage];
-        }else
-        {
+        } else {
             imageView.image = [UIImage imageNamed:image];
         }
         return YES;
-    }else if ([image isKindOfClass:[NSData class]])
-    {
+    } else if ([image isKindOfClass:[NSData class]]) {
         imageView.image = [UIImage imageWithData:image];
         return YES;
-    }else if ([image isKindOfClass:[UIImage class]])
-    {
+    } else if ([image isKindOfClass:[UIImage class]]) {
         imageView.image = image;
         return YES;
-    }else
-    {
+    } else {
         return NO;
     }
     
 }
--(void)didSelectImageView
-{
+
+- (void)didSelectImageView {
     if ([self.delegate respondsToSelector:@selector(circulateScrollview:didSelectItemWithIndex:)]) {
         [self.delegate circulateScrollview:self didSelectItemWithIndex:oneImageCount];
     }
@@ -250,23 +234,22 @@
 }
 
 //添加页符
--(void)pageNumControl
-{
+- (void)pageNumControl {
     //    if (!self.pageCtl) {
     //    }
     self.pageCtl.frame = CGRectMake(0, ViewHeight-20, ViewWidth, 20);
     self.pageCtl.numberOfPages = AllImageCount+1;
     [self addSubview:self.pageCtl];
 }
--(void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
-{
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     NSLog(@"scrollViewWillBeginDragging");
     if (self.timer) {
         [self.timer setFireDate:[NSDate distantFuture]];
     }
 }
--(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
-{
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     NSLog(@"scrollViewDidEndDecelerating");
     
     if (self.timer) {
@@ -274,34 +257,34 @@
     }
     [self resetTheScrollView];
 }
--(void)resetTheScrollView
-{
+
+- (void)resetTheScrollView {
     if (self.circulateScrollView.contentOffset.x == 0) {
         endImageCount--;
         oneImageCount--;
         secondImageCount--;
         if (endImageCount<0) {
             endImageCount = AllImageCount;
-        }else if (oneImageCount<0){
+        } else if (oneImageCount<0) {
             oneImageCount = AllImageCount;
         }
         //适配2张图片
-        if (secondImageCount<0){
+        if (secondImageCount<0) {
             secondImageCount = AllImageCount;
         }
         //NSLog(@"endImageCount=%ld oneImageCount=%ld secondImageCount=%ld",endImageCount,oneImageCount,secondImageCount);
         
-    }else if(self.circulateScrollView.contentOffset.x == ViewWidth*2){
+    } else if (self.circulateScrollView.contentOffset.x == ViewWidth*2) {
         endImageCount++;
         oneImageCount++;
         secondImageCount++;
         if (endImageCount>AllImageCount) {
             endImageCount = 0;
-        }else if (oneImageCount>AllImageCount){
+        } else if (oneImageCount>AllImageCount) {
             oneImageCount = 0;
         }
         //适配2张图片
-        if (secondImageCount>AllImageCount){
+        if (secondImageCount>AllImageCount) {
             secondImageCount = 0;
         }
     }
@@ -312,18 +295,19 @@
     [self imageView:self.secondImageView setImageWithImage:self.imageArray[secondImageCount]];
     self.pageCtl.currentPage = oneImageCount;
 }
--(void)dealloc
-{
+
+- (UIScrollView *)circulateScrollView {
+    if (!_circulateScrollView) {
+        _circulateScrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, ViewWidth, ViewHeight)];
+    }
+    return _circulateScrollView;
+}
+
+- (void)dealloc {
     [self.timer invalidate];
     self.timer = nil;
 }
 
-/*
- // Only override drawRect: if you perform custom drawing.
- // An empty implementation adversely affects performance during animation.
- - (void)drawRect:(CGRect)rect {
- // Drawing code
- }
- */
+
 
 @end
