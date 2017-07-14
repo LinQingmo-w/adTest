@@ -88,6 +88,7 @@
 - (void)drawRect:(CGRect)rect {
     
     self.circulateScrollView.frame = CGRectMake(0, 0, ViewWidth, ViewHeight);
+    self.pageCtl.frame = CGRectMake(0, ViewHeight-20, ViewWidth, 20);
     
     endImageCount = self.imageArray.count-1;
     oneImageCount = 0;
@@ -107,9 +108,8 @@
         return;
     }
     
-    for (UIView *view in self.circulateScrollView.subviews) {
-        [view removeFromSuperview];
-    }
+    
+//    [self.circulateScrollView removeAllSubviews];
     
     UITapGestureRecognizer *imagetap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didSelectImageView)];
     
@@ -117,12 +117,14 @@
     if (self.imageArray.count<=1){
         self.circulateScrollView.contentSize = CGSizeMake(ViewWidth, ViewHeight);
         
-        self.endImageView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, ViewWidth, ViewHeight)];
+        self.endImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, ViewWidth, ViewHeight)];
         [self imageView:self.endImageView setImageWithImage:self.imageArray[endImageCount]];
         self.endImageView.userInteractionEnabled = YES;
+        self.endImageView.backgroundColor = [UIColor whiteColor];
         [self.endImageView addGestureRecognizer:imagetap];
         
         [self.circulateScrollView addSubview:self.endImageView];
+        self.pageCtl.hidden = YES;
         
         
     } else {
@@ -130,12 +132,14 @@
         
         //左
         self.endImageView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, ViewWidth, ViewHeight)];
+        self.endImageView.backgroundColor = [UIColor whiteColor];
         [self imageView:self.endImageView setImageWithImage:self.imageArray[endImageCount]];
         [self.circulateScrollView addSubview:self.endImageView];
         //中
         self.oneImageView = [[UIImageView alloc]initWithFrame:CGRectMake(ViewWidth, 0, ViewWidth, ViewHeight)];
         [self imageView:self.oneImageView setImageWithImage:self.imageArray[oneImageCount]];
         self.oneImageView.userInteractionEnabled = YES;
+        self.oneImageView.backgroundColor = [UIColor whiteColor];
         [self.oneImageView addGestureRecognizer:imagetap];
         [self.circulateScrollView addSubview:self.oneImageView];
         //右
@@ -143,9 +147,12 @@
         [self imageView:self.secondImageView setImageWithImage:self.imageArray[secondImageCount]];
         [self.circulateScrollView addSubview:self.secondImageView];
         //        [self addSubview:self.circulateScrollView];
-        
+        self.secondImageView.backgroundColor = [UIColor whiteColor];
         if (self.isShowPageCtl) {
             [self pageNumControl];
+            self.pageCtl.hidden = NO;
+        } else {
+            self.pageCtl.hidden = YES;
         }
         
         
@@ -154,9 +161,15 @@
             self.autoNextpageAnimationTime = 0.0f;
         }
         //是否自动翻页
-        if (self.isAutoNextPage && self.autoNextpageDurationTime > 0) {
+        if (self.isAutoNextPage && self.autoNextpageDurationTime > 0  ) {
             
-            self.timer = [NSTimer scheduledTimerWithTimeInterval:self.autoNextpageDurationTime target:self selector:@selector(timerBegin) userInfo:nil repeats:YES];
+            if (!self.timer) {
+                self.timer = [NSTimer scheduledTimerWithTimeInterval:self.autoNextpageDurationTime target:self selector:@selector(timerBegin) userInfo:nil repeats:YES];
+            }else
+            {
+                [self.timer setFireDate:[NSDate date]];
+            }
+            
         }
         
         //是否显示下一页按钮
@@ -180,6 +193,11 @@
             [self addSubview:self.nextbtn];
         }
     }
+    
+    
+    self.oneImageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.secondImageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.endImageView.contentMode = UIViewContentModeScaleAspectFill;
     
 }
 
@@ -209,6 +227,7 @@
     
     if ([image isKindOfClass:[NSString class]]) {
         if ([image hasPrefix:@"http"]) {
+            //设置网络图片
 //            [imageView sd_setImageWithURL:image placeholderImage:PlaceholderImage];
         } else {
             imageView.image = [UIImage imageNamed:image];
